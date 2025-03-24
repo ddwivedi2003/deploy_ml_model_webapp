@@ -80,7 +80,57 @@ if training is not None:
                     st.write("Prediction Table")
                     st.dataframe(pred_table)   
     if model =="Decision Tree":
-        pass
+        st.header("Decision Tree Model")
+        st.write("Train the model")
+        button_train_dt = st.button("Train the model(Decision Tree)")
+        if button_train_dt:
+            x, y, y_pred_train, dt_model = dt.dt(fl)
+            st.write("Trained Model Graph")
+            fig_train, ax_train = plt.subplots()
+            ax_train.scatter(x, y, color='blue', label='Actual')
+            ax_train.plot(x, y_pred_train, color='red', label='Predicted')
+            ax_train.set_title("Decision Tree Trained Model Graph")
+            ax_train.set_xlabel("X")
+            ax_train.set_ylabel("Y")
+            st.pyplot(fig_train)
+            st.write("Model Trained Successfully")
+            st.session_state.verify = 1  # Update session state
+            button_pred = st.button("Predict")
+            if button_pred:
+                st.write("Choose the Option for Prediction")
+                dt_pred = st.selectbox("Select the option for prediction", ["Upload CSV for Prediction", "Enter the value for Prediction"])
+                if dt_pred == "Enter the value for Prediction":
+                    st.write("Enter the value for prediction")
+                    x_in = st.number_input("Enter the value for X")
+                    button_pred = st.button("Predict")
+                    if button_pred and st.session_state.dt_model is not None:
+                        import numpy as np
+                        y_pred = st.session_state.dt_model.predict(np.array([[x_in]]))
+                        st.write("The predicted value is", y_pred)
+
+                if dt_pred == "Upload CSV for Prediction":
+                    st.write("Upload the CSV file for prediction")
+                    pred = st.file_uploader("Select the CSV for prediction")
+                    button_pred = st.button("Predict")
+                    if button_pred and pred is not None and st.session_state.dt_model is not None:
+                        f2 = pd.read_csv(pred)
+                        x_1 = f2.iloc[:, :-1]
+                        y_pred = st.session_state.dt_model.predict(x_1)
+
+                        x_out_flat = x_1.values.flatten()
+                        y_pred_out_flat = y_pred.flatten()
+
+                        x_out_flat = pd.Series(x_out_flat).reset_index(drop=True)
+                        y_pred_out_flat = pd.Series(y_pred_out_flat).reset_index(drop=True)
+
+                        pred_table = pd.DataFrame({
+                            "X": x_out_flat,
+                            "Y": y_pred_out_flat
+                        })
+
+                        st.write("Prediction Table")
+                        st.dataframe(pred_table)
+
 
 st.markdown("Developed by: [Dewashish Dwivedi] for more info visit [Linkedin](https://www.linkedin.com/in/dewashish-dwivedi-806a92206/)")
 
